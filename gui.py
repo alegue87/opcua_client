@@ -1,21 +1,15 @@
 #!/usr/bin/env python3
 
-import re
-
-from asciimatics.effects import Julia, Clock, Print
-from asciimatics.widgets import Frame, TextBox, Layout, Label, Divider, Text, \
-    CheckBox, RadioButtons, Button, PopUpDialog
-from asciimatics.renderers import BarChart, VBarChart, FigletText
+from asciimatics.effects import Julia, Print, Effect
+from asciimatics.widgets import Frame
+from asciimatics.renderers import BarChart, DynamicRenderer
 
 from asciimatics.scene import Scene
 from asciimatics.screen import Screen
-from asciimatics.exceptions import ResizeScreenError, NextScene, StopApplication, \
-    InvalidFields
+from asciimatics.exceptions import ResizeScreenError
 from opcua import Client
-from threading import Thread
 import sys
 import math
-import time
 
 
 class CustomBarChart(BarChart):
@@ -177,10 +171,27 @@ def connect():
     handle = sub.subscribe_data_change(dataList)
     sub.subscribe_events()
 
-        
 
-def wv1(x, r):
-    return lambda: (math.floor((1 + math.sin(math.pi * (2*time.time()+x) / 5)*r)*100))/100
+from datetime import datetime
+class TextField(Effect):
+    def __init__(self,screen, text, fun, x, y, **kwargs):
+        super(TextField, self).__init__(screen, **kwargs)
+
+        self.fun = fun
+        self.text = text
+        self.x = x
+        self.y = y
+    
+    @property
+    def stop_frame(self):
+        return self._stop_frame
+
+    def reset(self):
+        pass
+
+    def _update(self, frame_no):
+        self._screen.print_at(self.text + str(self.fun()), self.x, self.y, Screen.COLOUR_BLUE)
+
 
 class ChartFrame(Frame):
     def __init__(self, screen, x, y, chartName, scale, intervals, fun, label):
@@ -208,16 +219,47 @@ def demo(screen, scene):
             return lambda: group1_list[i]
         else:
             return lambda: group1_list[i]/scale
-    
+        
+    def getDriverState(i=4):
+        def swi(i):
+            v = group1_list[i]
+            #n = datetime.now()
+            #v = int( n.strftime("%S"))
+            match(v):
+                case 0:
+                    return 'Inibito'
+                case 1:
+                    return 'Pronto'
+                case 4:
+                    return 'In marcia'
+                case 5:
+                    return 'Perdita alimentazione'
+                case 6:
+                    return 'Decelerazione'
+                case 7:
+                    return 'Immissione cc'
+                case 9:
+                    return 'Errore'
+                case 15:
+                    return 'Sotto tensione'
+                case 16:
+                    return 'Inizializzazione'
+                case _:
+                    return 'Value error'
+                
+        return lambda: swi(i)
+
+
     effects = [
         Julia(screen),
         ChartFrame(screen, 1, 1, 'Frequency', scale=500, intervals=100, fun=getValue(0,10), label='Hz'),
         ChartFrame(screen, 1, 5, 'Volts', scale=240, intervals=60, fun=getValue(1), label='Volts'),
-        ChartFrame(screen, 1, 9, 'Kw', scale=1, intervals=0.2, fun=getValue(2,10), label='Kw'),
+        ChartFrame(screen, 1, 9, 'Kw', scale=1, intervals=0.2, fun=getValue(2,100), label='Kw'),
         ChartFrame(screen, 1, 13, 'Rpm', scale=1000, intervals=200, fun=getValue(3), label='Rpm'),
-        ChartFrame(screen, 43, 1, 'Amp', scale=5, intervals=1, fun=getValue(3,10), label='Amp'),
-        ChartFrame(screen, 43, 5, 'AmpCop', scale=5, intervals=1, fun=getValue(5,10), label='AmpCop'),
-        ChartFrame(screen, 43, 9, 'Load%', scale=100, intervals=20, fun=getValue(6), label='Load %'),
+        ChartFrame(screen, 43, 1, 'Amp', scale=5, intervals=1, fun=getValue(5,100), label='Amp'),
+        ChartFrame(screen, 43, 5, 'AmpCop', scale=5, intervals=1, fun=getValue(6,100), label='AmpCop'),
+        ChartFrame(screen, 43, 9, 'Load%', scale=100, intervals=20, fun=getValue(7), label='Load %'),
+        TextField(screen, text='Stato azionamento: ', fun=getDriverState(4), x=45 ,y=13),
     ]
     scenes.append(Scene(effects, -1))
 
@@ -226,7 +268,7 @@ def demo(screen, scene):
 
 
 last_scene = None
-connect()
+#connect()
 while True:
     try:
         Screen.wrapper(demo, catch_interrupt=False, arguments=[last_scene])

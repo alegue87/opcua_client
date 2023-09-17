@@ -252,13 +252,13 @@ def demo(screen, scene):
 
     effects = [
         Julia(screen),
-        ChartFrame(screen, 1, 1, 'Frequency', scale=500, intervals=100, fun=getValue(0,10), label='Hz'),
+        ChartFrame(screen, 1, 1, 'Frequency', scale=50, intervals=10, fun=getValue(0,10), label='Hz'),
         ChartFrame(screen, 1, 5, 'Volts', scale=240, intervals=60, fun=getValue(1), label='Volts'),
         ChartFrame(screen, 1, 9, 'Kw', scale=1, intervals=0.2, fun=getValue(2,100), label='Kw'),
         ChartFrame(screen, 1, 13, 'Rpm', scale=1000, intervals=200, fun=getValue(3), label='Rpm'),
         ChartFrame(screen, 43, 1, 'Amp', scale=5, intervals=1, fun=getValue(5,100), label='Amp'),
         ChartFrame(screen, 43, 5, 'AmpCop', scale=5, intervals=1, fun=getValue(6,100), label='AmpCop'),
-        ChartFrame(screen, 43, 9, 'Load%', scale=100, intervals=20, fun=getValue(7), label='Load %'),
+        ChartFrame(screen, 43, 9, 'Load%', scale=100, intervals=20, fun=getValue(7,10), label='Load %'),
         TextField(screen, text='Stato azionamento: ', fun=getDriverState(4), x=45 ,y=13),
     ]
     scenes.append(Scene(effects, -1))
@@ -268,7 +268,7 @@ def demo(screen, scene):
 
 
 last_scene = None
-#connect()
+connect()
 while True:
     try:
         Screen.wrapper(demo, catch_interrupt=False, arguments=[last_scene])

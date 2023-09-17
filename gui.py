@@ -42,8 +42,8 @@ class CustomBarChart(BarChart):
         if self._keys:
             max_key = max([len(x) for x in self._keys])
             key_x = start_x
-            int_w -= 15#max_key + 10
-            start_x += 15#max_key + 10
+            int_w -= 7#max_key + 10
+            start_x += 7#max_key + 10
 
         # Now add the axes - resizing chart space as required...
         if (self._axes & BarChart.X_AXIS) > 0:
@@ -85,6 +85,9 @@ class CustomBarChart(BarChart):
                     self._write(self._axes_lines.v_inside, x, start_y + line)
                 self._write(self._axes_lines.h_up, x, start_y + int_h)
                 if self._labels:
+                    i = int(i*10)/10
+                    if i >= 1:
+                        i = math.floor(i)
                     val = str(i)
                     self._write(val, x - (len(val) // 2), start_y + int_h + 1)
                 i += self._intervals
@@ -109,7 +112,7 @@ class CustomBarChart(BarChart):
                 key = self._keys[i]
                 pos = max_key - len(key)
                 self._write(key, key_x + pos, y)
-                self._write(str(fn()), key_x + pos, y+1)
+                self._write(str(fn()), key_x + pos, y+2)
 
 
 
@@ -142,7 +145,7 @@ class CustomBarChart(BarChart):
 
         return self._plain_image, self._colour_map
 
-group1_list = []
+group1_list = [1]*8
 class SubHandler(object):
 
     """
@@ -153,7 +156,7 @@ class SubHandler(object):
     """
 
     def datachange_notification(self, node, val, data):
-        print("Python: New data change event", node, val)
+        #print("Python: New data change event", node, val)
         global group1_list
         group1_list = val
 
@@ -162,10 +165,12 @@ class SubHandler(object):
 
 def connect():
     client = Client("opc.tcp://192.168.1.138:4840")
+    #client = Client("opc.tcp://localhost:4840")
     # client = Client("opc.tcp://admin@localhost:4840/freeopcua/server/") #connect using a user
     client.connect()
 
     dataList = client.get_node('ns=2;s=group1')
+    #dataList = client.get_node('ns=2;s=ciao')
     # subscribing to a variable node
     handler = SubHandler()
     sub = client.create_subscription(500, handler)
@@ -185,32 +190,34 @@ class ChartFrame(Frame):
                                          x=x, y=y, reduce_cpu=True
         )
 
-        hchartA = CustomBarChart(6, 80, [fun],
+        hchartA = CustomBarChart(3, 40, [fun],
             gradient=[
                 (5, Screen.COLOUR_WHITE, Screen.COLOUR_WHITE),
                 (15, Screen.COLOUR_YELLOW, Screen.COLOUR_YELLOW),
                 (30, Screen.COLOUR_RED, Screen.COLOUR_RED),
             ],
-            scale=scale, axes=BarChart.X_AXIS, intervals=intervals, labels=True, border=True, keys=[label])
+            scale=scale, axes=BarChart.X_AXIS, intervals=intervals, labels=True, border=False, keys=[label])
         
         self.add_effect(Print(screen, hchartA, x=x, y=y, transparent=False, speed=1))
 
 
 def demo(screen, scene):
     scenes = []
-    value = wv1(1, 30)
-    def getValue(i):
-        return lambda: group1_list[i]
+    def getValue(i, scale=1):
+        if(scale == 1):
+            return lambda: group1_list[i]
+        else:
+            return lambda: group1_list[i]/scale
     
     effects = [
         Julia(screen),
-        ChartFrame(screen, 2, 2, 'Frequency', scale=40, intervals=10, fun=getValue(0), label='Hz'),
-        ChartFrame(screen, 2, 9, 'Volts', scale=240, intervals=60, fun=getValue(1), label='Volts'),
-        ChartFrame(screen, 2, 16, 'Kw', scale=1000, intervals=200, fun=getValue(2), label='Kw'),
-        ChartFrame(screen, 2, 23, 'Rpm', scale=1000, intervals=200, fun=getValue(3), label='Rpm'),
-        ChartFrame(screen, 2, 30, 'Amp', scale=5, intervals=1, fun=getValue(3), label='Amp'),
-        ChartFrame(screen, 2, 37, 'AmpCop', scale=5, intervals=1, fun=getValue(5), label='AmpCop'),
-        ChartFrame(screen, 2, 44, 'Load%', scale=100, intervals=10, fun=getValue(6), label='Load %'),
+        ChartFrame(screen, 1, 1, 'Frequency', scale=500, intervals=100, fun=getValue(0,10), label='Hz'),
+        ChartFrame(screen, 1, 5, 'Volts', scale=240, intervals=60, fun=getValue(1), label='Volts'),
+        ChartFrame(screen, 1, 9, 'Kw', scale=1, intervals=0.2, fun=getValue(2,10), label='Kw'),
+        ChartFrame(screen, 1, 13, 'Rpm', scale=1000, intervals=200, fun=getValue(3), label='Rpm'),
+        ChartFrame(screen, 43, 1, 'Amp', scale=5, intervals=1, fun=getValue(3,10), label='Amp'),
+        ChartFrame(screen, 43, 5, 'AmpCop', scale=5, intervals=1, fun=getValue(5,10), label='AmpCop'),
+        ChartFrame(screen, 43, 9, 'Load%', scale=100, intervals=20, fun=getValue(6), label='Load %'),
     ]
     scenes.append(Scene(effects, -1))
 

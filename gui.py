@@ -164,7 +164,7 @@ class SubHandler(object):
         print("Python: New event", event)
 
 def connect():
-    client = Client("opc.tcp://192.168.1.138:4840")
+    client = Client("opc.tcp://192.168.1.106:4840")
     #client = Client("opc.tcp://localhost:4840")
     # client = Client("opc.tcp://admin@localhost:4840/freeopcua/server/") #connect using a user
     client.connect()

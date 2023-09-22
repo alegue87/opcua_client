@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-from asciimatics.effects import Julia, Print, Effect
+from asciimatics.effects import Julia, Print, Effect, Wipe
 from asciimatics.widgets import Frame
-from asciimatics.renderers import BarChart, DynamicRenderer
+from asciimatics.renderers import BarChart
 
 from asciimatics.scene import Scene
 from asciimatics.screen import Screen
@@ -272,6 +272,7 @@ def demo(screen, scene):
         return lambda: swi(i)
     effects = [
         #Julia(screen),
+        Wipe(screen, bg=Screen.COLOUR_GREEN, stop_frame=screen.height * 2 + 30),
         ChartFrame(screen, 1, 1, 'Frequency', scale=50, intervals=10, fun=getValue(0,10), label='Hz'),
         ChartFrame(screen, 1, 5, 'Volts', scale=240, intervals=60, fun=getValue(1), label='Volts'),
         ChartFrame(screen, 1, 9, 'Kw', scale=1, intervals=0.2, fun=getValue(2,100), label='Kw'),
@@ -279,9 +280,9 @@ def demo(screen, scene):
         ChartFrame(screen, 43, 1, 'Amp', scale=5, intervals=1, fun=getValue(5,100), label='Amp'),
         ChartFrame(screen, 43, 5, 'AmpCop', scale=5, intervals=1, fun=getValue(6,100), label='AmpCop'),
         ChartFrame(screen, 43, 9, 'Load%', scale=100, intervals=20, fun=getValue(7,10), label='Load %'),
-        TextField(screen, text='Stato azionamento: '.ljust(25), fun=getDriverState(4), x=46 ,y=15),
-        TextField(screen, text='Alert: '.ljust(25), fun=getDriverAlert(8), x=46 ,y=18),
-        TextField(screen, text='Stato azionamento: '.ljust(25), fun=getDriverIndiMaDi(11), x=46 ,y=21),
+        TextField(screen, text='Stato azionamento: '.ljust(25), fun=getDriverState(4), x=43 ,y=13),
+        TextField(screen, text='Alert: '.ljust(25), fun=getDriverAlert(8), x=43 ,y=14),
+        TextField(screen, text='Info: '.ljust(25), fun=getDriverIndiMaDi(11), x=43 ,y=15),
 
     ]
     scenes.append(Scene(effects, -1))
@@ -291,7 +292,7 @@ def demo(screen, scene):
 
 
 last_scene = None
-#connect()
+connect()
 while True:
     try:
         Screen.wrapper(demo, catch_interrupt=False, arguments=[last_scene])

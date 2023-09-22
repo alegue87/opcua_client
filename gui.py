@@ -11,6 +11,8 @@ from opcua import Client
 import sys
 import math
 
+group1_list = [1]*12
+
 
 class CustomBarChart(BarChart):
     """
@@ -54,21 +56,21 @@ class CustomBarChart(BarChart):
         scale = int_w if self._scale is None else self._scale
 
         if self._axes & BarChart.X_AXIS:
-            self._write(self._axes_lines.h * int_w, start_x, start_y + int_h)
+            self._write(self._axes_lines.h * int_w, start_x, start_y + int_h, colour=Screen.COLOUR_GREEN)
         if self._axes & BarChart.Y_AXIS:
             for line in range(int_h):
-                self._write(self._axes_lines.v, start_x - 1, start_y + line)
+                self._write(self._axes_lines.v, start_x - 1, start_y + line, colour=Screen.COLOUR_GREEN)
         if self._axes & BarChart.BOTH == BarChart.BOTH:
-            self._write(self._axes_lines.up_right, start_x - 1, start_y + int_h)
+            self._write(self._axes_lines.up_right, start_x - 1, start_y + int_h, colour=Screen.COLOUR_GREEN)
 
         if self._labels:
             pos = start_y + int_h
             if self._axes & BarChart.X_AXIS:
                 pos += 1
 
-            self._write("0", start_x, pos)
+            self._write("0", start_x, pos, colour=Screen.COLOUR_GREEN)
             text = str(scale)
-            self._write(text, start_x + int_w - len(text), pos)
+            self._write(text, start_x + int_w - len(text), pos, colour=Screen.COLOUR_GREEN)
 
         # Now add any interval markers if required...
         if self._intervals is not None:
@@ -76,14 +78,14 @@ class CustomBarChart(BarChart):
             while i < scale:
                 x = start_x + int(i * int_w / scale) - 1
                 for line in range(int_h):
-                    self._write(self._axes_lines.v_inside, x, start_y + line)
-                self._write(self._axes_lines.h_up, x, start_y + int_h)
+                    self._write(self._axes_lines.v_inside, x, start_y + line, colour=Screen.COLOUR_GREEN)
+                self._write(self._axes_lines.h_up, x, start_y + int_h, colour=Screen.COLOUR_GREEN)
                 if self._labels:
                     i = int(i*10)/10
                     if i >= 1:
                         i = math.floor(i)
                     val = str(i)
-                    self._write(val, x - (len(val) // 2), start_y + int_h + 1)
+                    self._write(val, x - (len(val) // 2), start_y + int_h + 1, colour=Screen.COLOUR_GREEN)
                 i += self._intervals
 
         # Allow double-width bars if there's space.
@@ -105,8 +107,8 @@ class CustomBarChart(BarChart):
             if self._keys:
                 key = self._keys[i]
                 pos = max_key - len(key)
-                self._write(key, key_x + pos, y)
-                self._write(str(fn()), key_x + pos, y+2)
+                self._write(key, key_x + pos, y, colour=Screen.COLOUR_YELLOW)
+                self._write(str(fn()), key_x + pos, y+2, colour=Screen.COLOUR_CYAN)
 
 
 
@@ -139,7 +141,6 @@ class CustomBarChart(BarChart):
 
         return self._plain_image, self._colour_map
 
-group1_list = [1]*8
 class SubHandler(object):
 
     """
@@ -190,7 +191,7 @@ class TextField(Effect):
         pass
 
     def _update(self, frame_no):
-        self._screen.print_at(self.text + str(self.fun()), self.x, self.y, Screen.COLOUR_BLUE)
+        self._screen.print_at(self.text + str(self.fun()), self.x, self.y, Screen.COLOUR_WHITE)
 
 
 class ChartFrame(Frame):
@@ -249,9 +250,28 @@ def demo(screen, scene):
                 
         return lambda: swi(i)
 
+    def getDriverAlert(i=8):
+        def swi(i):
+            v = group1_list[i]
+            #n = datetime.now()
+            #v = int( n.strftime("%S"))
+            match(v):
+                case _:
+                    return bin(v)[2:].zfill(8)
+        return lambda: swi(i)
 
+    def getDriverIndiMaDi(i=11):
+        def swi(i):
+            v = group1_list[i]
+            #n = datetime.now()
+            #v = int( n.strftime("%S"))
+            match(v):
+                case _:
+                    return bin(v)[2:].zfill(8)
+                
+        return lambda: swi(i)
     effects = [
-        Julia(screen),
+        #Julia(screen),
         ChartFrame(screen, 1, 1, 'Frequency', scale=50, intervals=10, fun=getValue(0,10), label='Hz'),
         ChartFrame(screen, 1, 5, 'Volts', scale=240, intervals=60, fun=getValue(1), label='Volts'),
         ChartFrame(screen, 1, 9, 'Kw', scale=1, intervals=0.2, fun=getValue(2,100), label='Kw'),
@@ -259,7 +279,10 @@ def demo(screen, scene):
         ChartFrame(screen, 43, 1, 'Amp', scale=5, intervals=1, fun=getValue(5,100), label='Amp'),
         ChartFrame(screen, 43, 5, 'AmpCop', scale=5, intervals=1, fun=getValue(6,100), label='AmpCop'),
         ChartFrame(screen, 43, 9, 'Load%', scale=100, intervals=20, fun=getValue(7,10), label='Load %'),
-        TextField(screen, text='Stato azionamento: ', fun=getDriverState(4), x=45 ,y=13),
+        TextField(screen, text='Stato azionamento: '.ljust(25), fun=getDriverState(4), x=46 ,y=15),
+        TextField(screen, text='Alert: '.ljust(25), fun=getDriverAlert(8), x=46 ,y=18),
+        TextField(screen, text='Stato azionamento: '.ljust(25), fun=getDriverIndiMaDi(11), x=46 ,y=21),
+
     ]
     scenes.append(Scene(effects, -1))
 
@@ -268,7 +291,7 @@ def demo(screen, scene):
 
 
 last_scene = None
-connect()
+#connect()
 while True:
     try:
         Screen.wrapper(demo, catch_interrupt=False, arguments=[last_scene])

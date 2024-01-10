@@ -14,3 +14,9 @@ quindi avviare l'installazione dei requirements
 (di pillow usa la 10.2.0)
 
 pip install -r requirements.txt --break-system-packages
+
+per trovare il pii utilizzare:
+arp -na
+
+	? (192.168.1.115) at b8:27:eb:da:92:6c [ether] on wlp3s0
+

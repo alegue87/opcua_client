@@ -228,23 +228,23 @@ def demo(screen, scene):
             #v = int( n.strftime("%S"))
             match(v):
                 case 0:
-                    return 'Inibito'
+                    return 'Inibito              '
                 case 1:
-                    return 'Pronto'
+                    return 'Pronto               '
                 case 4:
-                    return 'In marcia'
+                    return 'In marcia            '
                 case 5:
                     return 'Perdita alimentazione'
                 case 6:
-                    return 'Decelerazione'
+                    return 'Decelerazione        '
                 case 7:
-                    return 'Immissione cc'
+                    return 'Immissione cc        '
                 case 9:
-                    return 'Errore'
+                    return 'Errore               '
                 case 15:
-                    return 'Sotto tensione'
+                    return 'Sotto tensione       '
                 case 16:
-                    return 'Inizializzazione'
+                    return 'Inizializzazione     '
                 case _:
                     return 'Value error'
                 
@@ -271,7 +271,7 @@ def demo(screen, scene):
                 
         return lambda: swi(i)
     effects = [
-        #Julia(screen),
+        Julia(screen),
         Wipe(screen, bg=Screen.COLOUR_GREEN, stop_frame=screen.height * 2 + 30),
         ChartFrame(screen, 1, 1, 'Frequency', scale=50, intervals=10, fun=getValue(0,10), label='Hz'),
         ChartFrame(screen, 1, 5, 'Volts', scale=240, intervals=60, fun=getValue(1), label='Volts'),

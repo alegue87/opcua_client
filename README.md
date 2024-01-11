@@ -15,8 +15,9 @@ quindi avviare l'installazione dei requirements
 
 pip install -r requirements.txt --break-system-packages
 
-per trovare il pii utilizzare:
+per trovare il pii utilizzare: non va?
 arp -na
 
 	? (192.168.1.115) at b8:27:eb:da:92:6c [ether] on wlp3s0
+
 
